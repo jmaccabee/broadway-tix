@@ -42,7 +42,7 @@ def build_calendar_urls(start_date, end_date):
     for date in month_range:
         calendar_url = constants.CALENDAR_URL_FORMAT.format(
             title_slug=settings.TITLE_SLUG,
-            aristotle_id=settings.ARISTOTLE_ID,
+            show_id=settings.SHOW_ID,
             year=date.year,
             month=date.month,
         )
@@ -72,7 +72,7 @@ def build_tickets_url(performance_id):
     """
     tickets_url = constants.TICKET_URL_FORMAT.format(
         title_slug=settings.TITLE_SLUG,
-        aristotle_id=settings.ARISTOTLE_ID,
+        show_id=settings.SHOW_ID,
         performance_id=performance_id,
     )
     return tickets_url
@@ -98,7 +98,7 @@ def make_filepath_to_data(performance_time=''):
     """
     today_date_str = datetime.datetime.today().strftime('%Y%m%d')
     path_to_app = os.path.dirname(os.path.realpath(__file__))
-    path_to_performance = f'{path_to_app}/../data/{settings.TITLE_SLUG}/'
+    path_to_performance = f'{path_to_app}/../data/{settings.TITLE_SLUG}'
     if not os.path.exists(path_to_performance):
         os.mkdir(path_to_performance)
 
@@ -114,6 +114,7 @@ def save_data(data, performance_time=''):
     Save data to CSV file.
     """
     df = pd.DataFrame.from_dict(data)
-    filepath_to_data = make_filepath_to_data(performance_time)    
-    print('Saving data to path:', filepath_to_data)
+    filepath_to_data = make_filepath_to_data(performance_time)
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%i')
+    print(f'[{now}] Saving data to path:', filepath_to_data)
     df.to_csv(filepath_to_data)

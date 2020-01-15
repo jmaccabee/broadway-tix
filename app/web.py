@@ -119,6 +119,9 @@ def get_available_seats_for_performance(
         raise exceptions.TicketsRequestHTTPError()
 
     tickets_data = tickets_response.json()
+    if tickets_data['status'] == constants.TICKETS_API_BUSY_STATUS:
+        raise TicketsApiIsBusyError()
+
     return parse.parse_ticket_details(
         tickets_data=tickets_data,
         performance_id=performance_id,

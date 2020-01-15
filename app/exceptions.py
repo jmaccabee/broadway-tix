@@ -12,3 +12,7 @@ class TicketsMetadataRequestHTTPError(Exception):
 
 class TicketsRequestForbiddenError(Exception):
     pass
+
+
+class TicketsApiIsBusyError(Exception):
+    pass
