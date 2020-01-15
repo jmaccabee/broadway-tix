@@ -1,0 +1,2 @@
+class CalendarRequestHTTPError(Exception):
+    pass
