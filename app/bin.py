@@ -46,12 +46,23 @@ def get_performances_in_date_range(
 
 
 if __name__ == '__main__':
-    performances = get_performances_in_date_range(
-        settings.START_DATE_INCLUSIVE_STR,
-        settings.END_DATE_EXCLUSIVE_STR,
+    # performances = get_performances_in_date_range(
+    #     settings.START_DATE_INCLUSIVE_STR,
+    #     settings.END_DATE_EXCLUSIVE_STR,
+    # )
+    # ticketable_performances = [
+    #     performance
+    #     for performance in performances
+    #     if utils.is_ticketable_performance(performance)
+    # ]
+    # for performance in ticketable_performances:
+    performance = {'performance_id': '950700'}
+    tickets_url = utils.build_tickets_url(performance['performance_id'])
+    performance_metadata = web.get_performance_seating_metadata(
+        tickets_url
     )
-    ticketable_performances = [
-        performance
-        for performance in performances
-        if utils.is_ticketable_performance(performance)
-    ]
+    import pdb; pdb.set_trace()
+    available_seats = web.get_available_seats_for_performance(
+        tickets_url, 
+        performance_metadata['price_ids'],
+    )
