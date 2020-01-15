@@ -115,4 +115,5 @@ def save_data(data, performance_time=''):
     """
     df = pd.DataFrame.from_dict(data)
     filepath_to_data = make_filepath_to_data(performance_time)    
+    print('Saving data to path:', filepath_to_data)
     df.to_csv(filepath_to_data)

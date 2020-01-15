@@ -53,7 +53,6 @@ def get_available_tickets_for_performance(performance):
 
 
 if __name__ == '__main__':
-    import pdb; pdb.set_trace()
     start_date = utils.stringdate_to_datetime(
         settings.START_DATE_INCLUSIVE_STR
     )
