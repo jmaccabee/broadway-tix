@@ -1,6 +1,17 @@
+import datetime
+import os
+
 from dateutil.rrule import rrule, MONTHLY
+import pandas as pd
 
 from app import constants, settings
+
+
+def stringdate_to_datetime(dt, date_format='%Y-%m-%d'):
+    return datetime.datetime.strptime(
+        dt, 
+        date_format,
+    )
 
 
 def generate_month_range(start_date, end_date):
@@ -40,14 +51,17 @@ def build_calendar_urls(start_date, end_date):
     return calendar_urls
 
 
-def is_ticketable_performance(performance):
+def is_target_performance(performance, start_date, end_date):
     """
     Ticketable performances have valid 
-    availability and status values.
+    availability and status values and 
+    appear within the target window.
     """
     return (
-        performance['availability'] == constants.PERFORMANCE_AVAILABLE_STATUS &
-        performance['status'] == constants.PERFORMANCE_ON_SALE_STATUS
+        (performance['availability'] == constants.PERFORMANCE_AVAILABLE_STATUS) &
+        (performance['status'] == constants.PERFORMANCE_ON_SALE_STATUS) & 
+        (performance['date'] >= start_date) & 
+        (performance['date'] < end_date)
     )
 
 
@@ -75,3 +89,30 @@ def get_price_ids_from_sections(sections):
         section_price_ids.extend(price_ids)
     # make the list of price IDs unique
     return list(set(section_price_ids))
+
+
+def make_filepath_to_data(performance_time=''):
+    """
+    Create a filepath to the location of our data 
+    directory to write our ticket files to.
+    """
+    today_date_str = datetime.datetime.today().strftime('%Y%m%d')
+    path_to_app = os.path.dirname(os.path.realpath(__file__))
+    path_to_performance = f'{path_to_app}/../data/{settings.TITLE_SLUG}/'
+    if not os.path.exists(path_to_performance):
+        os.mkdir(path_to_performance)
+
+    path_to_data = f'{path_to_performance}/availability_on_{today_date_str}'
+
+    if performance_time:
+        path_to_data += f'_{performance_time}'
+    return path_to_data + '.csv'
+
+
+def save_data(data, performance_time=''):
+    """
+    Save data to CSV file.
+    """
+    df = pd.DataFrame.from_dict(data)
+    filepath_to_data = make_filepath_to_data(performance_time)    
+    df.to_csv(filepath_to_data)

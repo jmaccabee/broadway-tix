@@ -1,31 +1,15 @@
-import datetime
 import time
 
 from app import settings, utils, web
 
 
-def get_performances_in_date_range(
-        start_date_inclusive_str, 
-        end_date_exclusive_str, 
-        date_format='%Y-%m-%d',
-    ):
+def get_performances_in_date_range(start_date, end_date):
     """
     Fetches the performance IDs from the Broadway.com calendar page
-    between start_date_inclusive_str and end_date_exclusive_str, 
-    parsed to dates using date_format.
+    between start_date and end_date. 
 
     Performance IDs are used to get available ticket prices.
     """
-    # parse date strings to datetimes
-    start_date = datetime.datetime.strptime(
-        start_date_inclusive_str, 
-        date_format,
-    )
-    end_date = datetime.datetime.strptime(
-        end_date_exclusive_str, 
-        date_format,
-    )
-
     # build the list of calendar URLs you need to fetch to get
     # the list of performance IDs from start_date to end_date
     calendar_urls = utils.build_calendar_urls(
@@ -45,24 +29,48 @@ def get_performances_in_date_range(
     return performances_in_date_range
 
 
-if __name__ == '__main__':
-    # performances = get_performances_in_date_range(
-    #     settings.START_DATE_INCLUSIVE_STR,
-    #     settings.END_DATE_EXCLUSIVE_STR,
-    # )
-    # ticketable_performances = [
-    #     performance
-    #     for performance in performances
-    #     if utils.is_ticketable_performance(performance)
-    # ]
-    # for performance in ticketable_performances:
-    performance = {'performance_id': '950700'}
+def get_available_tickets_for_performance(performance):
+    """
+    Constructs the tickets_url for the performance, 
+    fetches the CSRF Token and price IDs to view available tickets via API,
+    and then fetches the available ticket information.
+    """
     tickets_url = utils.build_tickets_url(performance['performance_id'])
     performance_metadata = web.get_performance_seating_metadata(
         tickets_url
     )
-    import pdb; pdb.set_trace()
     available_seats = web.get_available_seats_for_performance(
         tickets_url, 
+        performance_metadata['csrf_token'],
+        performance_metadata['session_id'],
         performance_metadata['price_ids'],
+        performance['performance_id'],
+        performance['date'],
+        performance['time'],
     )
+    time.sleep(settings.REQUEST_SLEEP_TIME_SECONDS)
+    return available_seats
+
+
+if __name__ == '__main__':
+    import pdb; pdb.set_trace()
+    start_date = utils.stringdate_to_datetime(
+        settings.START_DATE_INCLUSIVE_STR
+    )
+    end_date = utils.stringdate_to_datetime(
+        settings.END_DATE_EXCLUSIVE_STR
+    )
+    performances = get_performances_in_date_range(start_date, end_date)
+    ticketable_performances = [
+        performance
+        for performance in performances
+        if utils.is_target_performance(performance, start_date, end_date)
+    ]
+    all_available_seats = []
+    for performance in ticketable_performances:
+        available_seats = get_available_tickets_for_performance(performance)
+        # save intermediate files in case our program fails before finishing
+        utils.save_data(available_seats, performance['time'])
+        all_available_seats.extend(available_seats)
+    # then save the whole file
+    utils.save_data(all_available_seats)

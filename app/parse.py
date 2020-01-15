@@ -1,3 +1,6 @@
+from app import utils
+
+
 def parse_performances_from_calendar_data(calendar_data):
     """
     Extracts the relevant performance metadata 
@@ -9,7 +12,7 @@ def parse_performances_from_calendar_data(calendar_data):
 
     return [
         {
-            'date': performance_date['date'],
+            'date': utils.stringdate_to_datetime(performance_date['date']),
             'time': performance['time'],
             'status': performance['status'],
             'availability': performance['availability'],
@@ -20,13 +23,17 @@ def parse_performances_from_calendar_data(calendar_data):
     ]
 
 
-def parse_ticket_details(tickets_data):
+def parse_ticket_details(
+        tickets_data,
+        performance_id,
+        date,
+        time,
+    ):
     """
     Extracts the relevant ticket metadata
     from the tickets response JSON object.
     """
-    import pdb; pdb.set_trace()
-    tickets = calendar_data['data']['tickets']
+    tickets = tickets_data['data']['tickets']
     if not tickets:
         return []
 
@@ -41,7 +48,10 @@ def parse_ticket_details(tickets_data):
             'row_name': ticket['RowName'],
             'section_name': ticket['SectionName'],
             'quality': ticket['Quality'],
-
+            'section_id': ticket['SectionId'],
+            'peformance_id': performance_id,
+            'performance_date': date,
+            'performance_time': time,
         } 
         for ticket in tickets
     ]

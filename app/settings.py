@@ -7,5 +7,3 @@ TITLE_SLUG = 'moulin-rouge-musical'
 REQUEST_SLEEP_TIME_SECONDS = 5
 
 TICKET_QUANTITY = 2
-
-CSRF_TOKEN = 'vFuEpagucqQcdmd1AX2wQDZj2tWtprl3RhrXPG9RceYX8EdOKblYLZZtYqt4yUop'
